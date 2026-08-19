@@ -152,6 +152,10 @@ func (f *Fragment) HasTag(tag string) bool {
 // expires; everything else defaults to published (unreviewed content can be
 // marked draft explicitly).
 func resolveStatus(fields map[string]any, now time.Time) Status {
+	if value, ok := fields["visible"].(bool); ok && !value {
+		// The classic visible:false front-matter flag hides the fragment.
+		return StatusDraft
+	}
 	raw := ""
 	if value, ok := fields["status"].(string); ok {
 		raw = strings.ToLower(strings.TrimSpace(value))
