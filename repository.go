@@ -97,10 +97,13 @@ func NewFileSystemRepository(options RepositoryOptions) Repository {
 	}
 }
 
-// Load reads and parses every .md file in the content directory.
+// Load reads and parses every .md file in the content directory. A missing
+// directory yields an empty repository so optional sections can be omitted.
 func (r *fileSystemRepository) Load() error {
 	entries, err := os.ReadDir(r.options.Path)
-	if err != nil {
+	if os.IsNotExist(err) {
+		entries = nil
+	} else if err != nil {
 		return fmt.Errorf("fragmentsgo: read content dir: %w", err)
 	}
 	now := r.now()
