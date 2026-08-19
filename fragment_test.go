@@ -245,3 +245,16 @@ func TestExcludeOption(t *testing.T) {
 		t.Fatalf("all = %d, want 1 (excluded file dropped)", got)
 	}
 }
+
+func TestVisibleFalseHides(t *testing.T) {
+	dir := t.TempDir()
+	writeContent(t, dir, "hidden.md", "---\ntitle: Hidden\nvisible: false\n---\nBody")
+	writeContent(t, dir, "shown.md", "---\ntitle: Shown\n---\nBody")
+	repo := NewFileSystemRepository(RepositoryOptions{Path: dir, Now: fixedNow})
+	if err := repo.Load(); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(repo.All()); got != 1 {
+		t.Fatalf("all = %d, want 1 (visible:false hidden)", got)
+	}
+}
