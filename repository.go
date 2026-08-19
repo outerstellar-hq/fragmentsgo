@@ -39,6 +39,9 @@ type RepositoryOptions struct {
 	// Ordered selects listing order: true sorts by Order then Title
 	// (pages, projects); false (default) sorts dated content newest first.
 	Ordered bool
+	// Exclude drops files whose base name matches (checked case-blind
+	// against the full path), e.g. to keep self-referential entries out.
+	Exclude func(path string) bool
 }
 
 // Repository provides access to a set of fragments.
@@ -104,6 +107,9 @@ func (r *fileSystemRepository) Load() error {
 	fragments := make([]*Fragment, 0, len(entries))
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.EqualFold(filepath.Ext(entry.Name()), ".md") {
+			continue
+		}
+		if r.options.Exclude != nil && r.options.Exclude(entry.Name()) {
 			continue
 		}
 		fragment, err := r.parseFile(filepath.Join(r.options.Path, entry.Name()), now)

@@ -229,3 +229,19 @@ func TestReadingTimeOf(t *testing.T) {
 		t.Fatalf("short = %d, want 1", got)
 	}
 }
+
+func TestExcludeOption(t *testing.T) {
+	dir := t.TempDir()
+	writeContent(t, dir, "keep.md", "---\ntitle: Keep\n---\nBody")
+	writeContent(t, dir, "outerstellar-secret.md", "---\ntitle: Hidden\n---\nBody")
+	repo := NewFileSystemRepository(RepositoryOptions{
+		Path:    dir,
+		Exclude: func(name string) bool { return strings.Contains(strings.ToLower(name), "outerstellar") },
+	})
+	if err := repo.Load(); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(repo.All()); got != 1 {
+		t.Fatalf("all = %d, want 1 (excluded file dropped)", got)
+	}
+}
