@@ -275,7 +275,9 @@ func (r *fileSystemRepository) rewriteFrontMatter(slug string, mutate func(map[s
 	if err := encoder.Encode(fields); err != nil {
 		return err
 	}
-	encoder.Close()
+	if err := encoder.Close(); err != nil {
+		return err
+	}
 	output := append([]byte("---\n"+front.String()+"---\n\n"), body...)
 	if err := os.WriteFile(path, output, 0o644); err != nil {
 		return fmt.Errorf("fragmentsgo: write %s: %w", path, err)
