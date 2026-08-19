@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>{{ .Post.Fragment.Title }} — fragmentsgo example</title></head>
+<body>
+<nav><a href="/blog">← Blog</a></nav>
+<article>
+  <h1>{{ .Post.Fragment.Title }}</h1>
+  <p><small>{{ .Post.Fragment.Date.Format "January 2, 2006" }} · {{ .Post.Fragment.ReadingTime }} min read</small></p>
+  <div>{{ .Post.Fragment.HTML }}</div>
+</article>
+<nav class="post-nav">
+  {{ with .Post.Previous }}<a href="{{ .URL }}">← {{ .Title }}</a>{{ end }}
+  {{ with .Post.Next }}<a href="{{ .URL }}">{{ .Title }} →</a>{{ end }}
+</nav>
+</body>
+</html>

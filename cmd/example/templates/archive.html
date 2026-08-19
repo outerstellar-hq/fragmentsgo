@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Archive — fragmentsgo example</title></head>
+<body>
+<nav><a href="/blog">← Blog</a></nav>
+<h1>Archive</h1>
+{{ if .Years }}
+  {{ range .Years }}
+  <section><h2><a href="/blog/archive/{{ .Year }}">{{ .Year }}</a></h2>
+    {{ range .Months }}<h3>{{ .Month }}</h3>
+      <ul>{{ range .Posts }}<li><a href="{{ .URL }}">{{ .Title }}</a></li>{{ end }}</ul>
+    {{ end }}
+  </section>
+  {{ end }}
+{{ else }}
+  <ul>{{ range .Posts }}<li><a href="{{ .URL }}">{{ .Title }}</a></li>{{ end }}</ul>
+{{ end }}
+</body>
+</html>

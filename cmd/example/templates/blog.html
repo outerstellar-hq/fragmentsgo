@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>{{ .Page.TotalItems }} posts — fragmentsgo example</title></head>
+<body>
+<nav><a href="/blog">Blog</a> · <a href="/search">Search</a> · <a href="/about">About</a></nav>
+<h1>Blog{{ with .Query }} — #{{ . }}{{ end }}</h1>
+{{ range .Page.Posts }}
+<article>
+  <h2><a href="{{ .URL }}">{{ .Title }}</a></h2>
+  <p><small>{{ .Date.Format "January 2, 2006" }} · {{ .ReadingTime }} min read · {{ range .Tags }}#{{ . }} {{ end }}</small></p>
+  <p>{{ .Preview }}</p>
+</article>
+{{ else }}<p>No posts.</p>{{ end }}
+{{ if gt .Page.TotalPages 1 }}
+<nav class="pagination">
+  {{ if gt .Page.Page 1 }}<a href="?page={{ dec .Page.Page }}">← newer</a>{{ end }}
+  Page {{ .Page.Page }} of {{ .Page.TotalPages }}
+  {{ if lt .Page.Page .Page.TotalPages }}<a href="?page={{ inc .Page.Page }}">older →</a>{{ end }}
+</nav>
+{{ end }}
+</body>
+</html>
