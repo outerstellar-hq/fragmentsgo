@@ -86,14 +86,14 @@ func runNew(args []string, stdout, stderr io.Writer) int {
 	body := fmt.Sprintf("---\ntitle: %s\ndate: %s\nstatus: %s\n---\n\nWrite here.\n",
 		title, time.Now().UTC().Format("2006-01-02"), *status)
 	if err := os.MkdirAll(*dir, 0o755); err != nil {
-		fmt.Fprintf(stderr, "new: %v\n", err)
+		_, _ = fmt.Fprintf(stderr, "new: %v\n", err)
 		return 1
 	}
 	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
-		fmt.Fprintf(stderr, "new: %v\n", err)
+		_, _ = fmt.Fprintf(stderr, "new: %v\n", err)
 		return 1
 	}
-	fmt.Fprintf(stdout, "created %s\n", path)
+	_, _ = fmt.Fprintf(stdout, "created %s\n", path)
 	return 0
 }
 
