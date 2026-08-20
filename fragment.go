@@ -37,6 +37,10 @@ type Fragment struct {
 	Title string
 	// Date is the publication date from front matter (zero when absent).
 	Date time.Time
+	// Updated is the optional last-modified date from the "updated"
+	// front-matter key (zero when absent); it never affects visibility
+	// or ordering, only feeds/sitemap metadata.
+	Updated time.Time
 	// Tags and Categories come from front matter.
 	Tags       []string
 	Categories []string
