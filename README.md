@@ -48,6 +48,23 @@ See `cmd/example` for a complete runnable site.
 | `rss` | RSS 2.0 feed builder |
 | `sitemap` | sitemap.xml builder |
 | `httpadapter` | Mounts everything on any `*http.ServeMux` |
+| `reload` | Dependency-free development watcher: polls directories for Markdown changes and fires a debounced callback |
+| `cmd/fragmentsgo` | CLI: scaffold fragments (`new`) and validate directories (`validate`) |
+
+## Development workflow
+
+```bash
+# Scaffold a draft (slug from the title; refuses to overwrite)
+go run ./cmd/fragmentsgo new -dir ./content/blog "My Next Post"
+
+# Validate front matter, slug collisions, and URL clashes
+go run ./cmd/fragmentsgo validate ./content/blog ./content/articles
+
+# Hot-reload content while developing (poll-based, stdlib only)
+watcher := reload.Watch(ctx, []string{"content"}, reload.Options{Interval: 2 * time.Second}, func() {
+    _ = store.Refresh() // or repo.Load()
+})
+```
 
 ## Content model
 
