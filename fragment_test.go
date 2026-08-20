@@ -279,3 +279,28 @@ func TestVisibleFalseHides(t *testing.T) {
 		t.Fatalf("all = %d, want 1 (visible:false hidden)", got)
 	}
 }
+func TestEverythingIncludesInvisibleStates(t *testing.T) {
+	dir := t.TempDir()
+	writeContent(t, dir, "live.md", "---\ntitle: Live\ndate: 2026-03-01\n---\nBody")
+	writeContent(t, dir, "pending.md", "---\ntitle: Pending\ndate: 2026-03-02\nstatus: review\n---\nBody")
+	writeContent(t, dir, "later.md", "---\ntitle: Later\ndate: 2026-03-03\npublishAt: 2030-01-01\n---\nBody")
+	writeContent(t, dir, "old.md", "---\ntitle: Old\ndate: 2026-03-04\nstatus: archived\n---\nBody")
+	repo := NewFileSystemRepository(RepositoryOptions{Path: dir, BaseURL: "/blog"})
+	if err := repo.Load(); err != nil {
+		t.Fatal(err)
+	}
+	if got := len(repo.All()); got != 1 {
+		t.Fatalf("All() = %d fragments, want 1 (visible only)", got)
+	}
+	everything := repo.Everything()
+	if len(everything) != 4 {
+		t.Fatalf("Everything() = %d fragments, want 4", len(everything))
+	}
+	// Dated repositories list newest first.
+	wantOrder := []string{"old", "later", "pending", "live"}
+	for i, fragment := range everything {
+		if fragment.Slug != wantOrder[i] {
+			t.Fatalf("Everything()[%d] = %s, want %s", i, fragment.Slug, wantOrder[i])
+		}
+	}
+}

@@ -52,6 +52,10 @@ type Repository interface {
 	// content; Order then Title for undated content), visible ones only
 	// unless IncludeInvisible was set.
 	All() []*Fragment
+	// Everything returns every fragment — including drafts, scheduled,
+	// and other invisible states — in the same listing order. It is the
+	// administrative lifecycle view; public listings should use All.
+	Everything() []*Fragment
 	// BySlug finds a fragment by slug.
 	BySlug(slug string) (*Fragment, error)
 	// ByURL finds a fragment by its public URL.
@@ -65,13 +69,14 @@ type Repository interface {
 }
 
 type fileSystemRepository struct {
-	options   RepositoryOptions
-	parser    *MarkdownParser
-	now       func() time.Time
-	mu        sync.RWMutex
-	fragments []*Fragment
-	bySlug    map[string]*Fragment
-	byURL     map[string]*Fragment
+	options    RepositoryOptions
+	parser     *MarkdownParser
+	now        func() time.Time
+	mu         sync.RWMutex
+	fragments  []*Fragment
+	everything []*Fragment
+	bySlug     map[string]*Fragment
+	byURL      map[string]*Fragment
 	// bySlugAll indexes every parsed fragment, visible or not, so
 	// lifecycle mutations can find drafts and scheduled content.
 	bySlugAll map[string]*Fragment
@@ -136,10 +141,13 @@ func (r *fileSystemRepository) Load() error {
 	}
 	r.mu.Lock()
 	r.fragments = visible
+	r.everything = fragments
 	if r.options.Ordered {
 		SortOrdered(visible)
+		SortOrdered(fragments)
 	} else {
 		SortDated(visible)
+		SortDated(fragments)
 	}
 	r.bySlug = bySlug
 	r.byURL = byURL
@@ -208,6 +216,17 @@ func (r *fileSystemRepository) All() []*Fragment {
 	defer r.mu.RUnlock()
 	out := make([]*Fragment, len(r.fragments))
 	copy(out, r.fragments)
+	return out
+}
+
+// Everything returns every fragment — including drafts, scheduled, and
+// other invisible states — in the repository's listing order. It is the
+// administrative lifecycle view; public listings should use All.
+func (r *fileSystemRepository) Everything() []*Fragment {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	out := make([]*Fragment, len(r.everything))
+	copy(out, r.everything)
 	return out
 }
 

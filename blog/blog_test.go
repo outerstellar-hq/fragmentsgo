@@ -11,6 +11,7 @@ type fakeRepo struct{ fragments []*fragmentsgo.Fragment }
 
 func (f *fakeRepo) Load() error                  { return nil }
 func (f *fakeRepo) All() []*fragmentsgo.Fragment { return f.fragments }
+func (f *fakeRepo) Everything() []*fragmentsgo.Fragment { return f.fragments }
 func (f *fakeRepo) BySlug(slug string) (*fragmentsgo.Fragment, error) {
 	for _, fragment := range f.fragments {
 		if fragment.Slug == slug {
