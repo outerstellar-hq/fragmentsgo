@@ -11,6 +11,7 @@ type fakeRepo struct{ fragments []*fragmentsgo.Fragment }
 
 func (f *fakeRepo) Load() error                                   { return nil }
 func (f *fakeRepo) All() []*fragmentsgo.Fragment                  { return f.fragments }
+func (f *fakeRepo) Everything() []*fragmentsgo.Fragment           { return f.fragments }
 func (f *fakeRepo) BySlug(string) (*fragmentsgo.Fragment, error)  { return nil, fragmentsgo.ErrNotFound }
 func (f *fakeRepo) ByURL(string) (*fragmentsgo.Fragment, error)   { return nil, fragmentsgo.ErrNotFound }
 func (f *fakeRepo) UpdateStatus(string, fragmentsgo.Status) error { return nil }
