@@ -177,6 +177,7 @@ func (r *fileSystemRepository) parseFile(path string, now time.Time) (*Fragment,
 		fragment.Slug = Slugify(fragment.Title)
 	}
 	fragment.Date = parseTimeField(fields["date"])
+	fragment.Updated = parseTimeField(fields["updated"])
 	fragment.Tags = stringListField(fields, "tags")
 	fragment.Categories = stringListField(fields, "categories")
 	fragment.Preview = stringField(fields, "preview")

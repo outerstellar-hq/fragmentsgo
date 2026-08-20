@@ -26,6 +26,7 @@ func TestRepositoryLoadsFrontMatterAndRenders(t *testing.T) {
 title: Hello World
 slug: hello
 date: 2026-03-01
+updated: 2026-03-05T10:30:00Z
 tags: [go, testing]
 author: alex
 githubRepo: owner/repo
@@ -63,6 +64,26 @@ First paragraph with [link](https://example.com).
 	}
 	if fragment.ReadingTime < 1 {
 		t.Fatalf("reading time = %d", fragment.ReadingTime)
+	}
+	want := time.Date(2026, 3, 5, 10, 30, 0, 0, time.UTC)
+	if !fragment.Updated.Equal(want) {
+		t.Fatalf("updated = %v, want %v", fragment.Updated, want)
+	}
+}
+
+func TestUpdatedZeroWhenAbsent(t *testing.T) {
+	dir := t.TempDir()
+	writeContent(t, dir, "plain.md", "---\ntitle: Plain\ndate: 2026-03-01\n---\nBody")
+	repo := NewFileSystemRepository(RepositoryOptions{Path: dir, BaseURL: "/blog"})
+	if err := repo.Load(); err != nil {
+		t.Fatal(err)
+	}
+	fragment, err := repo.BySlug("plain")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !fragment.Updated.IsZero() {
+		t.Fatalf("updated should be zero without the key, got %v", fragment.Updated)
 	}
 }
 
