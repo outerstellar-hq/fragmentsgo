@@ -107,7 +107,7 @@ func runValidate(args []string, stdout, stderr io.Writer) int {
 		problems += validateDir(dir, stdout, stderr)
 	}
 	if problems > 0 {
-		fmt.Fprintf(stderr, "validate: %d problem(s)\n", problems)
+		_, _ = fmt.Fprintf(stderr, "validate: %d problem(s)\n", problems)
 		return 1
 	}
 	_, _ = fmt.Fprintln(stdout, "validate: OK")
@@ -120,7 +120,7 @@ func validateDir(dir string, stdout, stderr io.Writer) int {
 		BaseURL: "/",
 	})
 	if err := repository.Load(); err != nil {
-		fmt.Fprintf(stderr, "%s: load failed: %v\n", dir, err)
+		_, _ = fmt.Fprintf(stderr, "%s: load failed: %v\n", dir, err)
 		return 1
 	}
 	fragments := repository.Everything()
@@ -129,18 +129,18 @@ func validateDir(dir string, stdout, stderr io.Writer) int {
 	urls := map[string]string{}
 	for _, fragment := range fragments {
 		if previous, clash := slugs[fragment.Slug]; clash {
-			fmt.Fprintf(stderr, "%s: duplicate slug %q (also %s)\n", dir, fragment.Slug, previous)
+			_, _ = fmt.Fprintf(stderr, "%s: duplicate slug %q (also %s)\n", dir, fragment.Slug, previous)
 			problems++
 		} else {
 			slugs[fragment.Slug] = fragment.SourcePath
 		}
 		if previous, clash := urls[fragment.URL]; clash {
-			fmt.Fprintf(stderr, "%s: duplicate URL %q (also %s)\n", dir, fragment.URL, previous)
+			_, _ = fmt.Fprintf(stderr, "%s: duplicate URL %q (also %s)\n", dir, fragment.URL, previous)
 			problems++
 		} else {
 			urls[fragment.URL] = fragment.SourcePath
 		}
 	}
-	fmt.Fprintf(stdout, "%s: %d fragment(s)\n", dir, len(fragments))
+	_, _ = fmt.Fprintf(stdout, "%s: %d fragment(s)\n", dir, len(fragments))
 	return problems
 }
