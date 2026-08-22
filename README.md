@@ -49,6 +49,7 @@ See `cmd/example` for a complete runnable site.
 | `sitemap` | sitemap.xml builder |
 | `httpadapter` | Mounts everything on any `*http.ServeMux` |
 | `reload` | Dependency-free development watcher: polls directories for Markdown changes and fires a debounced callback |
+| `imageopt` | Re-encodes content images for the web: JPEGs downscaled and re-compressed, PNGs downscaled losslessly, other formats passed through |
 | `cmd/fragmentsgo` | CLI: scaffold fragments (`new`) and validate directories (`validate`) |
 
 ## Development workflow
@@ -59,6 +60,9 @@ go run ./cmd/fragmentsgo new -dir ./content/blog "My Next Post"
 
 # Validate front matter, slug collisions, and URL clashes
 go run ./cmd/fragmentsgo validate ./content/blog ./content/articles
+
+# Optimize a content image (in place or to a new path)
+go run ./cmd/fragmentsgo optimize -max 1600 -quality 80 photo.jpg
 
 # Hot-reload content while developing (poll-based, stdlib only)
 watcher := reload.Watch(ctx, []string{"content"}, reload.Options{Interval: 2 * time.Second}, func() {
