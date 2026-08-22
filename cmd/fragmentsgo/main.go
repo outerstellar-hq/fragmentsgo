@@ -17,6 +17,7 @@ import (
 	"time"
 
 	fragmentsgo "github.com/outerstellar-hq/fragmentsgo"
+	"github.com/outerstellar-hq/fragmentsgo/imageopt"
 )
 
 func main() {
@@ -33,6 +34,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return runNew(args[1:], stdout, stderr)
 	case "validate":
 		return runValidate(args[1:], stdout, stderr)
+	case "optimize":
+		return runOptimize(args[1:], stdout, stderr)
 	case "help", "-h", "--help":
 		usage(stdout)
 		return 0
@@ -49,6 +52,9 @@ func usage(w io.Writer) {
       Scaffold a draft Markdown fragment (slug from the title).
   fragmentsgo validate <directory> [directory ...]
       Parse every fragment and report front-matter, slug, and URL problems.
+  fragmentsgo optimize [-max 1600] [-quality 80] <input> [output]
+      Downscale and re-encode an image (JPEG/PNG); writes in place when
+      no output path is given.
 `)
 }
 
@@ -143,4 +149,46 @@ func validateDir(dir string, stdout, stderr io.Writer) int {
 	}
 	_, _ = fmt.Fprintf(stdout, "%s: %d fragment(s)\n", dir, len(fragments))
 	return problems
+}
+
+func runOptimize(args []string, stdout, stderr io.Writer) int {
+	flags := flag.NewFlagSet("optimize", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	maxWidth := flags.Int("max", 1600, "longest-edge pixel cap")
+	quality := flags.Int("quality", 80, "JPEG re-encoding quality")
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
+	rest := flags.Args()
+	if len(rest) < 1 || len(rest) > 2 {
+		_, _ = fmt.Fprintln(stderr, "optimize: input path required, optional output path")
+		return 2
+	}
+	source, err := os.ReadFile(rest[0])
+	if err != nil {
+		_, _ = fmt.Fprintf(stderr, "optimize: %v\n", err)
+		return 1
+	}
+	result, err := imageopt.Optimize(source, imageopt.Options{
+		MaxWidth: *maxWidth, JPEGQuality: *quality,
+	})
+	if err != nil {
+		_, _ = fmt.Fprintf(stderr, "optimize: %v\n", err)
+		return 1
+	}
+	if result.Format == imageopt.FormatOriginal {
+		_, _ = fmt.Fprintln(stdout, "passed through unchanged (unsupported format)")
+		return 0
+	}
+	target := rest[0]
+	if len(rest) == 2 {
+		target = rest[1]
+	}
+	if err := os.WriteFile(target, result.Data, 0o644); err != nil {
+		_, _ = fmt.Fprintf(stderr, "optimize: %v\n", err)
+		return 1
+	}
+	_, _ = fmt.Fprintf(stdout, "%s: %d -> %d bytes (%s, %dx%d)\n",
+		target, len(source), len(result.Data), result.Format, result.Width, result.Height)
+	return 0
 }
